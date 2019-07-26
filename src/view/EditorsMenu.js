@@ -6,7 +6,6 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import PubSub from 'pubsub-js';
 
-// const RGX_OSMID = /^(node|way|relation)\/\d+$/;
 const ID_URL = "https://openstreetmap.org/edit";
 const JOSM_URL = "http://localhost:27000?";
 
@@ -45,21 +44,20 @@ class EditorsMenu extends Component {
 	 */
 	_editJOSM() {
 		//Find bbox
-		const Y = 47.7; /*this.props.feature.coordinates[0];*/
-		const X = -1.17; /*this.props.feature.coordinates[1];*/
-		const R = 6371000;
-		const radius = 50;
-		const x1 = X - Math.toDegrees(radius / R / Math.cos(Math.toRadians(Y)));
-		const x2 = X + Math.toDegrees(radius / R / Math.cos(Math.toRadians(Y)));
-		const y1 = Y - Math.toDegrees(radius / R);
-		const y2 = Y + Math.toDegrees(radius / R);
+// 		const Y = this.props.feature.coordinates[0];
+// 		const X =  this.props.feature.coordinates[1];
+// 		const R = 6371000;
+// 		const radius = 50;
+// 		const x1 = X - Math.toDegrees(radius / R / Math.cos(Math.toRadians(Y)));
+// 		const x2 = X + Math.toDegrees(radius / R / Math.cos(Math.toRadians(Y)));
+// 		const y1 = Y - Math.toDegrees(radius / R);
+// 		const y2 = Y + Math.toDegrees(radius / R);
 
-		let url = JOSM_URL+"left="+x1+"&right="+x2+"&top="+y2+"&bottom="+y1;
+		let url = JOSM_URL; //+"left="+x1+"&right="+x2+"&top="+y2+"&bottom="+y1;
 		
-// 		if(this.props.feature.properties.id && RGX_OSMID.test(this.props.feature.properties.id)) {
-// 			const parts = this.props.feature.properties.id.split("/");
-// 			url += "&select=" + parts[0] + parts[1];
-// 		}
+		if(this.props.relation) {
+			url += "&select=relation" + this.props.relation;
+		}
 		
 		fetch(url)
 		.then(response => {
@@ -83,10 +81,9 @@ class EditorsMenu extends Component {
 			hashtags: "#"+window.EDITOR_NAME.replace(/ /g, "_")
 		};
 		
-// 		if(this.props.feature.properties.id && RGX_OSMID.test(this.props.feature.properties.id)) {
-// 			const parts = this.props.feature.properties.id.split("/");
-// 			params.id = parts[0].substring(0, 1) + parts[1];
-// 		}
+		if(this.props.relation) {
+			params.id = "r"+this.props.relation;
+		}
 		
 		url += Object.entries(params).map(p => p[0] + "=" + encodeURIComponent(p[1])).join("&");
 		
@@ -111,18 +108,25 @@ class EditorsMenu extends Component {
 	
 	render() {
 		const editors = [
-			{ id: "id", name: I18n.t("iD"), tip: I18n.t("Recommended, simplest one") },
+// 			{ id: "id", name: I18n.t("iD"), tip: I18n.t("Recommended, simplest one") },
 			{ id: "josm", name: I18n.t("JOSM"), tip: I18n.t("Most complete one") }
 		];
 		
 		return <div style={{display: "inline-block"}}>
 			<Button
-				onClick={e => this.setState({ open: true, anchor: e.currentTarget })}
+				onClick={e => {
+					if(editors.length > 1) {
+						this.setState({ open: true, anchor: e.currentTarget });
+					}
+					else {
+						this._click(editors[0].id);
+					}
+				}}
 			>
-				{I18n.t("Edit in external editor")}
+				{editors.length > 1 ? I18n.t("Edit in external editor") : I18n.t("Edit in %{editor}", { editor: editors[0].name })}
 			</Button>
 			
-			{this.state.anchor &&
+			{editors.length > 1 && this.state.anchor &&
 				<Menu
 					id="editors-menu"
 					anchorEl={this.state.anchor}

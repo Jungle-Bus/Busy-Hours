@@ -16,7 +16,7 @@ class NavLines extends Component {
 		
 		return <Paper style={{padding: 10}}><Breadcrumbs separator="›" aria-label="Breadcrumb" style={{display: "flex", justifyContent: "center"}}>
 			<Link to="/" style={stLink}>
-				{I18n.t("All lines")}
+				{I18n.t("Home")}
 			</Link>
 			
 			{line &&

@@ -3,6 +3,17 @@
 Busy Hours is web tool to allow easy editing of OpenStreetMap public transport hours.
 
 
+## Usage
+
+### Direct links
+
+You can create direct links to load public transport routes :
+
+* `http://yourhost.net/#/line/1234` : load relation route master 1234
+* `http://yourhost.net/#/line/1234/trip/4567` : load relation route 4567 (part of route master 1234)
+* `http://yourhost.net/#/load/2468` : load relation 2468 (can be route or route master, there will be an automatic redirect)
+
+
 ## Develop
 
 To run the project locally, you need to first `git clone` this repository, and have NodeJS >= 9 installed on your computer.

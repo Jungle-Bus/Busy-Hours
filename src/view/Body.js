@@ -5,12 +5,15 @@ import 'jungle_bus_web_components';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import Container from '@material-ui/core/Container';
+import DataLoader from './DataLoader';
 import DateFnsUtils from '@date-io/date-fns';
 import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
 import Header from './Header';
 import LineTrip from './LineTrip';
 import LoginDialog from './LoginDialog';
+import Welcome from './Welcome';
 
 /**
  * Body is the view main class.
@@ -35,20 +38,11 @@ class Body extends Component {
 			}
 		});
 		
-		this.state = {
-			lines: {
-				"1234": {
-					ref: "C4", type: "bus", name: "Ligne Chronostar 4",
-					network: "STAR", operator: "Kéolis Rennes", colour: "purple",
-					opening_hours: "Mo-Su 05:00-23:00", interval: 10,
-					rawTags: { type: "route_master", route_master: "bus", ref: "C4", network: "STAR" },
-					trips: {
-						"4567": { from: "Grand Quartier", to: "ZA Saint-Sulpice", name: "Grand Quartier > ZA Saint-Sulpice" },
-						"4568": { from: "ZA Saint-Sulpice", to: "Grand Quartier", name: "ZA Saint-Sulpice > Grand Quartier" }
-					}
-				}
-			}
-		};
+		this.state = {};
+	}
+	
+	_onDataLoaded(newData) {
+		this.setState({ lines: newData });
 	}
 	
 	render() {
@@ -57,16 +51,34 @@ class Body extends Component {
 				<ThemeProvider theme={this._theme}>
 					<Header {...this.state} />
 					
-					<div style={{margin: 10}}><Switch>
+					<Container maxWidth="md" style={{marginTop: 20, marginBottom: 20}}><Switch>
+						<Route exact path='/' component={Welcome} />
+						
 						<Route
-							exact path='/line/:lid'
-							render={props => <LineTrip {...this.state} {...this.props} />}
+							exact
+							path={this.state.lines ? '/load/:rid' : ['/load/:rid', '/line/:rid', '/line/:lid/trip/:rid' ]}
+							render={props => (
+								<DataLoader
+									{...props}
+									{...this.props}
+									onDataLoaded={d => this._onDataLoaded(d)}
+								/>
+							)}
 						/>
-						<Route
-							exact path='/line/:lid/trip/:tid'
-							render={props => <LineTrip {...this.state} {...this.props} />}
-						/>
-					</Switch></div>
+						
+						{this.state.lines && [
+							<Route
+								key={0}
+								exact path='/line/:lid'
+								render={props => <LineTrip {...this.state} {...this.props} />}
+							/>,
+							<Route
+								key={1}
+								exact path='/line/:lid/trip/:tid'
+								render={props => <LineTrip {...this.state} {...this.props} />}
+							/>
+						]}
+					</Switch></Container>
 					
 					<LoginDialog />
 				</ThemeProvider>

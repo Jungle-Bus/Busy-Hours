@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Body from './view/Body';
 import CONFIG from './config/config.json';
+import DataManager from './ctrl/DataManager';
 import I18n from 'i18nline/lib/i18n';
 import OsmAuth from 'osm-auth';
 import PubSub from 'pubsub-js';
@@ -56,6 +57,7 @@ class App {
 	 * @private
 	 */
 	_initCtrl() {
+		this._dataManager = new DataManager();
 	}
 	
 	/**
@@ -63,7 +65,7 @@ class App {
 	 * @private
 	 */
 	_initView() {
-		ReactDOM.render(<Body />, document.getElementById('root'));
+		ReactDOM.render(<Body dataManager={this._dataManager} />, document.getElementById('root'));
 		document.title=window.EDITOR_NAME;
 	}
 	

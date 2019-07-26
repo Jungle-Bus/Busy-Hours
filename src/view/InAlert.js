@@ -12,6 +12,9 @@ const ICONS = { "error": AlertCircle, "warning": Alert, "info": Information };
 
 /**
  * In alert displays a not-so important message to user inline.
+ * @property {string} message The text to display
+ * @property {string} [level] Importance level (info, warning, error)
+ * @property {Component} [icon] An icon to display
  */
 class InAlert extends Component {
 	render() {
