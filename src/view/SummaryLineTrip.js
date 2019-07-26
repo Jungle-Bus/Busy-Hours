@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
+import CONFIG from '../config/config.json';
 import EditorsMenu from './EditorsMenu';
 import I18n from 'i18nline/lib/i18n';
 
@@ -34,7 +35,7 @@ class SummaryTripLine extends Component {
 			<div style={{textAlign: "right"}}>
 				<Button>{I18n.t("See all tags")}</Button>
 				<Button
-					href={"https://openstreetmap.org/relation/"+(trip ? this.props.selectedTrip : this.props.selectedLine)}
+					href={CONFIG.osm_api_url+"/relation/"+(trip ? this.props.selectedTrip : this.props.selectedLine)}
 					target="_blank"
 				>
 					{I18n.t("See on OpenStreetMap.org")}

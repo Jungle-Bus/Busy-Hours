@@ -68,7 +68,7 @@ class App {
 	}
 	
 	/**
-	 * Launches authentication process
+	 * Initializes authentication system.
 	 * @private
 	 */
 	_initAuth() {
@@ -76,16 +76,16 @@ class App {
 			url: CONFIG.osm_api_url,
 			oauth_consumer_key: CONFIG.oauth_consumer_key,
 			oauth_secret: CONFIG.oauth_secret,
-			landing: window.EDITOR_URL + window.location.hash,
+			landing: window.location.pathname + window.location.hash,
 			singlepage: true
 		};
-		window.editor_user_auth = OsmAuth(opts);
+		this.auth = OsmAuth(opts);
 		
 		const params = this._readURLParams(window.location.href);
 		const token = params.oauth_token || localStorage.getItem("oauth_token") || null;
 		
 		if(token) {
-			window.editor_user_auth.bootstrapToken(token, () => {
+			this.auth.bootstrapToken(token, () => {
 				this._checkAuth();
 				window.history.pushState({}, "", window.location.href.replace("?oauth_token="+token, ""));
 				localStorage.setItem("oauth_token", token);
@@ -97,21 +97,14 @@ class App {
 			this.authWait = setInterval(this._checkAuth.bind(this), 100);
 		}
 		
-		/**
-		 * Event for logging in user
-		 * @event APP.USER.LOGIN
-		 * @memberof App
-		 */
-		PubSub.subscribe("APP.USER.LOGIN", (msg, data) => {
-			opts.landing = window.EDITOR_URL + window.location.hash;
-			window.editor_user_auth.options(opts);
+		PubSub.subscribe("UI.LOGIN.SURE", (msg, data) => {
+			opts.landing = window.location.pathname + window.location.hash;
+			this.auth.options(opts);
 			
-			if(!window.editor_user_auth.authenticated()) {
-				window.editor_user_auth.authenticate((err, res) => {
+			if(!this.auth.authenticated()) {
+				this.auth.authenticate((err, res) => {
 					if(err) {
-						console.error(err);
-						alert(window.I18n.t("Oops ! Something went wrong when trying to log you in"));
-						PubSub.publish("APP.USER.LOGOUT");
+						PubSub.publish("UI.MESSAGE.BASIC", { type: "error", message: I18n.t("Oops ! Something went wrong when trying to log you in") });
 					}
 					else {
 						this._checkAuth();
@@ -120,26 +113,19 @@ class App {
 			}
 		});
 		
-		/**
-		 * Event for logging out user
-		 * @event APP.USER.LOGOUT
-		 * @memberof App
-		 */
-		PubSub.subscribe("APP.USER.LOGOUT", (msg, data) => {
-			if(window.editor_user_auth && window.editor_user_auth.authenticated()) {
-				window.editor_user_auth.logout();
+		PubSub.subscribe("UI.LOGOUT.WANTS", (msg, data) => {
+			if(this.auth && this.auth.authenticated()) {
+				this.auth.logout();
 			}
 			
-			window.editor_user = null;
+			this.user = null;
 			localStorage.removeItem("oauth_token");
+			PubSub.publish("USER.INFO.READY", this.user);
 		});
 		
-		setTimeout(() => {
-			if(!window.editor_user) {
-				alert(window.I18n.t("You will be redirected in order to login using your OpenStreetMap account."));
-				PubSub.publish("APP.USER.LOGIN");
-			}
-		}, 5000);
+		PubSub.subscribe("USER.INFO.WANTS", (msg, data) => {
+			PubSub.publish("USER.INFO.READY", this.user);
+		});
 	}
 	
 	/**
@@ -147,39 +133,33 @@ class App {
 	 * @private
 	 */
 	_checkAuth() {
-		if(window.editor_user_auth.authenticated()) {
+		if(this.auth.authenticated()) {
 			if(this.authWait) {
 				clearInterval(this.authWait);
 			}
 			
 			//Get user details
-			window.editor_user_auth.xhr({
+			this.auth.xhr({
 				method: 'GET',
 				path: '/api/0.6/user/details'
 			}, (err, details) => {
 				if(err) {
 					console.log(err);
-					window.editor_user_auth.logout();
+					this.auth.logout();
 				}
 				else {
 					try {
-						window.editor_user = {
+						this.user = {
 							id: details.firstChild.childNodes[1].attributes.id.value,
 							name: details.firstChild.childNodes[1].attributes.display_name.value,
-							auth: window.editor_user_auth
+							auth: this.auth
 						};
 						
-						/**
-						 * Event when user has been successfully logged in
-						 * @event APP.USER.READY
-						 * @memberof App
-						 */
-						PubSub.publish("APP.USER.READY", { username: window.editor_user.name });
-						console.log("Logged in as", window.editor_user.name);
+						PubSub.publish("UI.LOGIN.DONE", { username: this.user.name });
 					}
 					catch(e) {
 						console.error(e);
-						PubSub.publish("APP.USER.LOGOUT");
+						PubSub.publish("UI.LOGOUT.WANTS");
 					}
 				}
 			});

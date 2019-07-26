@@ -10,6 +10,7 @@ import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
 import Header from './Header';
 import LineTrip from './LineTrip';
+import LoginDialog from './LoginDialog';
 
 /**
  * Body is the view main class.
@@ -21,13 +22,16 @@ class Body extends Component {
 		
 		// Set main colors of app
 		this._theme = createMuiTheme({
-			palette: {
-				primary: blue,
+			palette: {
+
+				primary: blue,
+
 				secondary: {
 					light: orange[500],
 					main: orange[800],
 					dark: orange[900]
-				},
+				},
+
 			}
 		});
 		
@@ -63,6 +67,8 @@ class Body extends Component {
 							render={props => <LineTrip {...this.state} {...this.props} />}
 						/>
 					</Switch></div>
+					
+					<LoginDialog />
 				</ThemeProvider>
 			</MuiPickersUtilsProvider>
 		</HashRouter>;
