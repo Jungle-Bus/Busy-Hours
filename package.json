@@ -40,7 +40,7 @@
     "mdi-react": "^5.4.0",
     "object-hash": "^1.3.1",
     "osm-auth": "^1.0.2",
-    "osm-request": "^1.2.3",
+    "osm-request": "^1.2.5",
     "osmtogeojson": "^3.0.0-beta.3",
     "pubsub-js": "^1.7.0",
     "react": "^16.8.6",
@@ -48,6 +48,7 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "2.1.5",
     "react-three-state-checkbox": "^1.2.2",
+    "transport-hours": "git+https://github.com/Jungle-Bus/transport-hours-js.git",
     "typeface-roboto": "0.0.75",
     "xml2js": "^0.4.19"
   },

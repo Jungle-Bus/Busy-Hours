@@ -37,8 +37,8 @@ class SummaryTripLine extends Component {
 			</h2>
 			
 			<ul>
-				<li>{I18n.t("Network") + " : " + line.network}</li>
-				<li>{I18n.t("Operator") + " : " + line.operator}</li>
+				<li>{I18n.t("Network") + " : " + (line.network ? line.network : I18n.t("not set"))}</li>
+				<li>{I18n.t("Operator") + " : " + (line.operator ? line.operator : I18n.t("not set"))}</li>
 			</ul>
 			
 			{this.state.showTags &&

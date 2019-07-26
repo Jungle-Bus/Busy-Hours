@@ -1,5 +1,6 @@
 import CONFIG from '../config/config.json';
 import OsmRequest from 'osm-request';
+import TransportHours from 'transport-hours';
 
 const VALID_MODES = [ "bus", "coach", "train", "subway", "monorail", "trolleybus", "aerialway", "funicular", "ferry", "tram", "share_taxi", "light_rail", "walking_bus" ];
 
@@ -11,6 +12,7 @@ class DataManager {
 	constructor() {
 		// Create OSM Request
 		this._osmApi = new OsmRequest({ endpoint: CONFIG.osm_api_url });
+		this._transportHours = new TransportHours();
 	}
 	
 	/**
@@ -24,14 +26,19 @@ class DataManager {
 	 * @private
 	 */
 	_createSimplifiedLineTrip(relid, reltags, trips) {
-		const result = {
-			ref: reltags.ref,
-			name: reltags.name,
-			colour: reltags.colour,
-			network: reltags.network,
-			operator: reltags.operator,
-			rawTags: reltags
-		};
+		if(relid.includes("/")) { relid = relid.split("/")[1]; }
+		
+		const result = Object.assign(
+			{
+				ref: reltags.ref,
+				name: reltags.name,
+				colour: reltags.colour,
+				network: reltags.network,
+				operator: reltags.operator,
+				rawTags: reltags
+			},
+			this._transportHours.tagsToHoursObject(reltags)
+		);
 		
 		if(reltags.type === "route") {
 			result.type = reltags.route;
@@ -122,7 +129,7 @@ class DataManager {
 							)
 							.then(otherTripsData => {
 								resolve(this._createSimplifiedLineTrip(
-									relation.$.id,
+									relationId,
 									this._osmApi.getTags(relation),
 									Object.assign({}, ...otherTripsData.map(t => this._createSimplifiedLineTrip(t.$.id, this._osmApi.getTags(t), null)))
 								));

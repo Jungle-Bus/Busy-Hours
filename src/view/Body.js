@@ -43,6 +43,7 @@ class Body extends Component {
 	
 	_onDataLoaded(newData) {
 		this.setState({ lines: newData });
+		console.log("Loaded data", newData);
 	}
 	
 	render() {

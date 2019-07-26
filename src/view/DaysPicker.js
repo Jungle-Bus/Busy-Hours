@@ -18,13 +18,17 @@ class DaysPicker extends Component {
 	_getWeekDays(locale) {
 		let baseDate = new Date(Date.UTC(2017, 0, 2)); // just a Monday
 		const weekDays = [];
-		for(let i = 0; i < 7; i++) {       
+		
+		for(let i = 0; i < 7; i++) {
 			weekDays.push({
 				val: baseDate.toLocaleDateString("en-GB", { weekday: "long" }).substring(0, 2).toLowerCase(),
 				lbl: baseDate.toLocaleDateString(locale, { weekday: "short" })
 			});
 			baseDate.setDate(baseDate.getDate() + 1);
 		}
+		
+		weekDays.push({ val: "ph", lbl: I18n.t("PH") });
+		
 		return weekDays;
 	}
 	

@@ -12,8 +12,15 @@ import { TimePicker } from "@material-ui/pickers";
  * TimePeriodPicker allows to select an hour range.
  */
 class TimePeriodPicker extends Component {
+	/**
+	 * @private
+	 */
+	_hourStringToDateObj(hour) {
+		return new Date("1970-01-01T"+hour+":00");
+	}
+	
 	render() {
-		return <FormControl component="fieldset">
+		return <FormControl component="fieldset" style={{display: "block"}}>
 			<FormGroup
 				value={this.props.value}
 				row
@@ -21,25 +28,26 @@ class TimePeriodPicker extends Component {
 			>
 				<TimePicker
 					ampm={false}
-					value={null}
+					value={this._hourStringToDateObj(this.props.fromHour)}
 					label={I18n.t("From")}
-					style={{width: 150}}
+					style={{width: 80}}
 				/>
 				
 				<TimePicker
 					ampm={false}
-					value={null}
+					value={this._hourStringToDateObj(this.props.toHour)}
 					label={I18n.t("To")}
-					style={{marginRight: 20, marginLeft: 20, width: 150}}
+					style={{marginRight: 20, marginLeft: 20, width: 80}}
 				/>
 				
 				<TextField
 					label={I18n.t("Interval")}
+					value={this.props.interval}
 					type="number"
 					InputProps={{
 						endAdornment: <InputAdornment position="end">min</InputAdornment>,
 					}}
-					style={{width: 150}}
+					style={{width: 80}}
 				/>
 				
 				<IconButton
