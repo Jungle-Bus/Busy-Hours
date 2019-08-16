@@ -13,12 +13,12 @@ class NavLines extends Component {
 		const line = this.props.selectedLine && this.props.lines && this.props.lines[this.props.selectedLine] ? this.props.lines[this.props.selectedLine] : null;
 		const trip = line && this.props.selectedTrip && line.trips[this.props.selectedTrip] ? line.trips[this.props.selectedTrip] : null;
 		const stLink = {textDecoration: "none", color: "inherit"}
-		
-		return <Paper style={{padding: 10}}><Breadcrumbs separator="›" aria-label="Breadcrumb" style={{display: "flex", justifyContent: "center"}}>
+
+		return <Paper style={{padding: 10}}><Breadcrumbs separator=" / " aria-label="Breadcrumb" style={{display: "flex", justifyContent: "center"}}>
 			<Link to="/" style={stLink}>
 				{I18n.t("Home")}
 			</Link>
-			
+
 			{line &&
 				<Link to={"/line/"+this.props.selectedLine} style={stLink}>
 					{I18n.t("Line")}
@@ -29,7 +29,7 @@ class NavLines extends Component {
 					</transport-thumbnail>
 				</Link>
 			}
-			
+
 			{line && trip &&
 				<Link to={"/line/"+this.props.selectedLine+"/trip/"+this.props.selectedTrip} style={stLink}>
 					{I18n.t("Trip")}
