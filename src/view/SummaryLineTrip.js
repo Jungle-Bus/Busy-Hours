@@ -12,16 +12,16 @@ import TagsTable from './TagsTable';
 class SummaryTripLine extends Component {
 	constructor() {
 		super();
-		
+
 		this.state = {
 			showTags: false
 		};
 	}
-	
+
 	render() {
 		const line = this.props.selectedLine && this.props.lines && this.props.lines[this.props.selectedLine] ? this.props.lines[this.props.selectedLine] : null;
 		const trip = line && this.props.selectedTrip && line.trips[this.props.selectedTrip] ? line.trips[this.props.selectedTrip] : null;
-		
+
 		return <div>
 			<h2>
 				<transport-thumbnail
@@ -35,16 +35,16 @@ class SummaryTripLine extends Component {
 					line.name
 				}
 			</h2>
-			
+
 			<ul>
 				<li>{I18n.t("Network") + " : " + (line.network ? line.network : I18n.t("not set"))}</li>
 				<li>{I18n.t("Operator") + " : " + (line.operator ? line.operator : I18n.t("not set"))}</li>
 			</ul>
-			
+
 			{this.state.showTags &&
 				<TagsTable tags={trip ? trip.rawTags : line.rawTags} style={{marginBottom: 20}}/>
 			}
-			
+
 			<div style={{textAlign: "right"}}>
 				<Button
 					onClick={() => this.setState({ showTags: !this.state.showTags })}
@@ -57,7 +57,7 @@ class SummaryTripLine extends Component {
 				>
 					{I18n.t("See on OSM.org")}
 				</Button>
-				
+
 				<EditorsMenu relation={this.props.selectedTrip || this.props.selectedLine} />
 			</div>
 		</div>;

@@ -13,12 +13,30 @@ class LineTrip extends Component {
 			selectedLine: this.props.match.params.lid,
 			selectedTrip: this.props.match.params.tid
 		});
-		
-		return <div>
+
+		return theProps.selectedLine && theProps.lines && theProps.lines[theProps.selectedLine] ? <div>
 			<NavLines {...theProps} />
 			<SummaryLineTrip {...theProps} />
 			<ContentLineTrip {...theProps} />
-		</div>;
+		</div> : <div></div>;
+	}
+
+	/**
+	 * Redirects to loader if relation data is missing
+	 * @private
+	 */
+	_checkDataLoaded() {
+		if(!this.props.match.params.lid || !this.props.lines || !this.props.lines[this.props.match.params.lid]) {
+			this.props.history.push("/load/"+this.props.match.params.lid);
+		}
+	}
+
+	componentDidMount() {
+		this._checkDataLoaded();
+	}
+
+	componentDidUpdate() {
+		this._checkDataLoaded();
 	}
 }
 

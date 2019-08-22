@@ -14,20 +14,20 @@ class DataManager {
 		this._osmApi = new OsmRequest({ endpoint: CONFIG.osm_api_url });
 		this._transportHours = new TransportHours();
 	}
-	
+
 	/**
 	 * @private
 	 */
 	_getRelNumber(relid) {
 		return relid.split("/")[1];
 	}
-	
+
 	/**
 	 * @private
 	 */
 	_createSimplifiedLineTrip(relid, reltags, trips) {
 		if(relid.includes("/")) { relid = relid.split("/")[1]; }
-		
+
 		const result = Object.assign(
 			{
 				ref: reltags.ref,
@@ -39,7 +39,7 @@ class DataManager {
 			},
 			this._transportHours.tagsToHoursObject(reltags)
 		);
-		
+
 		if(reltags.type === "route") {
 			result.type = reltags.route;
 			result.from = reltags.from;
@@ -49,10 +49,10 @@ class DataManager {
 			result.type = reltags.route_master;
 			result.trips = trips;
 		}
-		
+
 		return { [relid]: result };
 	}
-	
+
 	/**
 	 * Load all data related to given relation.
 	 * If relation is a route, loads route_master and all other routes.
@@ -66,7 +66,7 @@ class DataManager {
 			.then(relation => {
 				const relTags = this._osmApi.getTags(relation);
 				const transportMode = relTags.type === "route" ? relTags.route : relTags.route_master;
-				
+
 				// Check transport mode
 				if(VALID_MODES.includes(transportMode)) {
 					// Simple route
@@ -75,12 +75,12 @@ class DataManager {
 						this._osmApi.fetchRelationsForElement(relationId)
 						.then(parentRelations => {
 							const routeMasters = parentRelations.filter(r => this._osmApi.getTags(r).type === "route_master");
-							
+
 							// Single route master
 							if(routeMasters.length === 1) {
 								// Fetch other trips for this line
 								const otherTripsRel = routeMasters[0].member.filter(m => m.$.type === "relation" && m.$.ref !== relationId);
-								
+
 								// Other trips available
 								if(otherTripsRel.length > 0) {
 									Promise.all(
@@ -116,12 +116,15 @@ class DataManager {
 								reject("many_route_masters");
 							}
 						})
+						.catch(e => {
+							reject(e);
+						});
 					}
 					// Route master
 					else if(relTags.type === "route_master") {
 						// Fetch trips for this line
 						const tripsRel = relation.member.filter(m => m.$.type === "relation");
-						
+
 						// Other trips available
 						if(tripsRel.length > 0) {
 							Promise.all(
@@ -147,6 +150,9 @@ class DataManager {
 				else {
 					reject("invalid_mode");
 				}
+			})
+			.catch(e => {
+				reject(e);
 			});
 		});
 	}
