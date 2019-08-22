@@ -7,7 +7,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import PubSub from 'pubsub-js';
 
 const ID_URL = "https://openstreetmap.org/edit";
-const JOSM_URL = "http://localhost:27000?";
+const JOSM_URL = "http://localhost:8111";
 
 Math.toRadians = function(degrees) {
 	return degrees * Math.PI / 180;
@@ -23,13 +23,13 @@ Math.toDegrees = function(radians) {
 class EditorsMenu extends Component {
 	constructor() {
 		super();
-		
+
 		this.state = {
 			open: false,
 			anchor: false
 		};
 	}
-	
+
 	/**
 	 * Close the menu
 	 * @private
@@ -37,28 +37,18 @@ class EditorsMenu extends Component {
 	_onClose() {
 		this.setState({ open: false, anchor: null });
 	}
-	
+
 	/**
 	 * Opens and zoom in JOSM on current picture area.
 	 * @private
 	 */
 	_editJOSM() {
-		//Find bbox
-// 		const Y = this.props.feature.coordinates[0];
-// 		const X =  this.props.feature.coordinates[1];
-// 		const R = 6371000;
-// 		const radius = 50;
-// 		const x1 = X - Math.toDegrees(radius / R / Math.cos(Math.toRadians(Y)));
-// 		const x2 = X + Math.toDegrees(radius / R / Math.cos(Math.toRadians(Y)));
-// 		const y1 = Y - Math.toDegrees(radius / R);
-// 		const y2 = Y + Math.toDegrees(radius / R);
+		let url = JOSM_URL + "/load_object?";
 
-		let url = JOSM_URL; //+"left="+x1+"&right="+x2+"&top="+y2+"&bottom="+y1;
-		
 		if(this.props.relation) {
-			url += "&select=relation" + this.props.relation;
+			url += "&objects=r" + this.props.relation + "&relation_members=true";
 		}
-		
+
 		fetch(url)
 		.then(response => {
 			PubSub.publish("UI.MESSAGE.BASIC", { type: "info", message: I18n.t("Opened in JOSM") });
@@ -68,31 +58,31 @@ class EditorsMenu extends Component {
 			PubSub.publish("UI.MESSAGE.BASIC", { type: "error", message: I18n.t("Can't open in JOSM, are you sure remote control is enabled ?") });
 		});
 	}
-	
+
 	/**
 	 * Opens ID editor on current picture area.
 	 * @private
 	 */
 	_editId() {
 		let url = ID_URL + "#";
-		
+
 		const params = {
 // 			map: "21/"+this.props.feature.coordinates.join("/"),
 			hashtags: "#"+window.EDITOR_NAME.replace(/ /g, "_")
 		};
-		
+
 		if(this.props.relation) {
 			params.id = "r"+this.props.relation;
 		}
-		
+
 		url += Object.entries(params).map(p => p[0] + "=" + encodeURIComponent(p[1])).join("&");
-		
+
 		window.open(
 			url,
 			"_blank"
 		).focus();
 	}
-	
+
 	_click(editor) {
 		this._onClose();
 		switch(editor) {
@@ -105,13 +95,13 @@ class EditorsMenu extends Component {
 			default:
 		}
 	}
-	
+
 	render() {
 		const editors = [
 // 			{ id: "id", name: I18n.t("iD"), tip: I18n.t("Recommended, simplest one") },
 			{ id: "josm", name: I18n.t("JOSM"), tip: I18n.t("Most complete one") }
 		];
-		
+
 		return <div style={{display: "inline-block"}}>
 			<Button
 				onClick={e => {
@@ -125,7 +115,7 @@ class EditorsMenu extends Component {
 			>
 				{editors.length > 1 ? I18n.t("Edit in external editor") : I18n.t("Edit in %{editor}", { editor: editors[0].name })}
 			</Button>
-			
+
 			{editors.length > 1 && this.state.anchor &&
 				<Menu
 					id="editors-menu"
