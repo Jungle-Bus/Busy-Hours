@@ -24,10 +24,10 @@ class UserButtonComponent extends Component {
 			menuOpen: false,
 			menuAnchor: null
 		};
-		
+
 		this.psTokens = {};
 	}
-	
+
 	/**
 	 * Closes the menu.
 	 * @private
@@ -35,17 +35,17 @@ class UserButtonComponent extends Component {
 	_closeMenu() {
 		this.setState({ menuOpen: false, menuAnchor: null });
 	}
-	
+
 	/**
 	 * Handler for logout click.
 	 * @private
 	 */
 	_logoutClick() {
-		PubSub.publish("UI.LOGOUT.WANTS");
+		PubSub.publish("APP.USER.LOGOUT");
 		this._closeMenu();
 		this.setState({ connected: false, user: null });
 	}
-	
+
 	render() {
 		if(this.state.connected) {
 			return <div style={{display: "inline"}}>
@@ -76,7 +76,7 @@ class UserButtonComponent extends Component {
 			return <Tooltip title={I18n.t("Log In")} placement="bottom">
 				<Button
 					color="inherit"
-					onClick={() => PubSub.publish("UI.LOGIN.WANTS")}
+					onClick={() => PubSub.publish("APP.USER.WANTSLOGIN")}
 				>
 					<Account />
 					{I18n.t("Log In")}
@@ -84,13 +84,13 @@ class UserButtonComponent extends Component {
 			</Tooltip>;
 		}
 	}
-	
+
 	componentWillMount() {
-		this.psTokens.login = PubSub.subscribe("UI.LOGIN.DONE", (msg, data) => {
+		this.psTokens.login = PubSub.subscribe("APP.USER.READY", (msg, data) => {
 			this.setState({ user: data.username, connected: true });
 		});
 	}
-	
+
 	componentWillUnmount() {
 		if(this.psTokens.login) {
 			PubSub.unsubscribe(this.psTokens.login);
@@ -99,23 +99,3 @@ class UserButtonComponent extends Component {
 }
 
 export default UserButtonComponent;
-
-/**
- * Event when the user wants to login.
- * @event UI.LOGIN.WANTS
- * @memberof Events
- */
-
-/**
- * Event when user is logged in.
- * @event UI.LOGIN.DONE
- * @type {Object} Event data
- * @property {string} username The user name
- * @memberof Events
- */
-
-/**
- * Event when the user wants to logout.
- * @event UI.LOGOUT.WANTS
- * @memberof Events
- */

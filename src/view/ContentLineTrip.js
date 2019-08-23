@@ -19,16 +19,16 @@ import Tab from '@material-ui/core/Tab';
 class ContentTripLine extends Component {
 	constructor() {
 		super();
-		
+
 		this.state = {
 			tab: 0
 		};
 	}
-	
+
 	render() {
 		const line = this.props.selectedLine && this.props.lines && this.props.lines[this.props.selectedLine] ? this.props.lines[this.props.selectedLine] : null;
 		const trip = line && this.props.selectedTrip && line.trips[this.props.selectedTrip] ? line.trips[this.props.selectedTrip] : null;
-		
+
 		return <div>
 			<Tabs
 				value={trip ? 0 : this.state.tab}
@@ -40,27 +40,30 @@ class ContentTripLine extends Component {
 				{!trip && line.trips && <Tab label={I18n.t("Trips")} />
 }
 			</Tabs>
-			
+
 			{((!trip && this.state.tab === 0) || trip) && <div>
 				{trip &&
 					<InAlert
 						message={I18n.t("This trip belongs to line %{line}. If all trips of this line have similar hours, please edit line information instead of trips ones.", { line: line.ref })}
 					/>
 				}
-				
+
 				<HoursEditor
 					linetrip={trip || line}
 					relid={trip ? this.props.selectedTrip : this.props.selectedLine}
+					dataManager={this.props.dataManager}
+					editedPeriods={this.props.edits}
+					onEdit={periods => this.props.onEdit(periods)}
 				/>
 			</div>}
-			
+
 			{!trip && this.state.tab === 1 && <div>
 				{(line.opening_hours || line.interval) &&
 					<InAlert
 						message={I18n.t("This line already has hours defined. You may not need to add hours on trips if they are similar.")}
 					/>
 				}
-				
+
 				<List>
 					{Object.entries(line.trips).map(e => {
 						const [ tid, t ] = e;

@@ -1,5 +1,6 @@
 import CONFIG from '../config/config.json';
 import OsmRequest from 'osm-request';
+import PACKAGE from '../../package.json';
 import TransportHours from 'transport-hours';
 
 const VALID_MODES = [ "bus", "coach", "train", "subway", "monorail", "trolleybus", "aerialway", "funicular", "ferry", "tram", "share_taxi", "light_rail", "walking_bus" ];
@@ -11,7 +12,12 @@ const VALID_MODES = [ "bus", "coach", "train", "subway", "monorail", "trolleybus
 class DataManager {
 	constructor() {
 		// Create OSM Request
-		this._osmApi = new OsmRequest({ endpoint: CONFIG.osm_api_url });
+		this._osmApi = new OsmRequest({
+			endpoint: CONFIG.osm_api_url,
+			oauthConsumerKey: CONFIG.oauth_consumer_key,
+			oauthSecret: CONFIG.oauth_secret
+		});
+
 		this._transportHours = new TransportHours();
 	}
 
@@ -155,6 +161,47 @@ class DataManager {
 				reject(e);
 			});
 		});
+	}
+
+	/**
+	 * Upload period changes made on a relation to OSM.
+	 * @param {string} relationId The relation to update (example : "relation/1234")
+	 * @param {Object} allPeriods Object returned by HoursEditor, containing period array (days + intervals)
+	 * @return {Promise} Resolves on successful upload
+	 */
+	async saveRelationPeriods(relationId, allPeriods) {
+		// Check if user is authenticated
+		if(!window.editor_user || !window.editor_user_auth) {
+			return new Error("not_connected");
+		}
+		this._osmApi._auth = window.editor_user_auth;
+
+		// Convert editor data into tags
+		let newTags;
+		try {
+			newTags = this._transportHours.intervalsObjectToTags(allPeriods);
+		}
+		catch(e) {
+			return e;
+		}
+
+		// Create changeset
+		let changesetId;
+		try {
+			changesetId = await this._osmApi.createChangeset(
+				window.EDITOR_NAME+' '+PACKAGE.version,
+				"Changed hours/interval of public transport route "+relationId,
+				{ host: window.EDITOR_URL }
+			);
+		}
+		catch(e) {
+			return new Error("changeset_failed");
+		}
+
+		//TODO Send data to OSM
+		if(newTags && changesetId) {
+			console.log(relationId, newTags);
+		}
 	}
 }
 

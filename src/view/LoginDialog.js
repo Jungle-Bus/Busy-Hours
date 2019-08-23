@@ -16,38 +16,42 @@ import PubSub from 'pubsub-js';
 class LoginDialogComponent extends Component {
 	constructor() {
 		super();
-		
+
 		this.state = {
 			open: false
 		};
-		
-		PubSub.subscribe("UI.LOGIN.WANTS", (msg, data) => {
+
+		/**
+		 * Event when the user wants to login.
+		 * @event APP.USER.WANTSLOGIN
+		 */
+		PubSub.subscribe("APP.USER.WANTSLOGIN", (msg, data) => {
 			data = data || {};
 			this.setState({ open: true });
 		});
 	}
-	
+
 	/**
 	 * Handler for login button click.
 	 * @private
 	 */
 	_loginClicked() {
-		PubSub.publish("UI.LOGIN.SURE");
+		PubSub.publish("APP.USER.LOGIN");
 		this._closeDialog(false);
 	}
-	
+
 	/**
 	 * Handler for closing dialog
 	 * @private
 	 */
 	_closeDialog(backToHome) {
 		this.setState({ open: false });
-		
+
 		if(backToHome && this.props.history) {
 			this.props.history.push('/');
 		}
 	}
-	
+
 	render() {
 		return <Dialog
 			open={this.state.open}
@@ -72,9 +76,3 @@ class LoginDialogComponent extends Component {
 }
 
 export default withRouter(LoginDialogComponent);
-
-/**
- * Event when the user wants to login for sure.
- * @event UI.LOGIN.SURE
- * @memberof Events
- */

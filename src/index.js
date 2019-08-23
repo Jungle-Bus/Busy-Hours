@@ -25,7 +25,7 @@ class App {
 		this._initView();
 		this._initAuth();
 	}
-	
+
 	/**
 	 * Initializes internationalization system
 	 * @private
@@ -40,18 +40,16 @@ class App {
 				}
 			}
 		}
-		
+
 		I18n.locale = locale || window.navigator.userLanguage || window.navigator.language;
 		I18n.fallbacks = true;
-		
+
 		//Load translation files
 		for(const l of LOCALES) {
 			Object.assign(I18n.translations, require("./config/locales/"+l.replace("-", "_")+".json"));
 		}
-		
-		window.I18n = I18n;
 	}
-	
+
 	/**
 	 * Creates controller objects.
 	 * @private
@@ -59,7 +57,7 @@ class App {
 	_initCtrl() {
 		this._dataManager = new DataManager();
 	}
-	
+
 	/**
 	 * Create view components
 	 * @private
@@ -68,9 +66,9 @@ class App {
 		ReactDOM.render(<Body dataManager={this._dataManager} />, document.getElementById('root'));
 		document.title=window.EDITOR_NAME;
 	}
-	
+
 	/**
-	 * Initializes authentication system.
+	 * Launches authentication process
 	 * @private
 	 */
 	_initAuth() {
@@ -78,16 +76,16 @@ class App {
 			url: CONFIG.osm_api_url,
 			oauth_consumer_key: CONFIG.oauth_consumer_key,
 			oauth_secret: CONFIG.oauth_secret,
-			landing: window.location.pathname + window.location.hash,
+			landing: window.EDITOR_URL + window.location.hash,
 			singlepage: true
 		};
-		this.auth = OsmAuth(opts);
-		
+		window.editor_user_auth = OsmAuth(opts);
+
 		const params = this._readURLParams(window.location.href);
 		const token = params.oauth_token || localStorage.getItem("oauth_token") || null;
-		
+
 		if(token) {
-			this.auth.bootstrapToken(token, () => {
+			window.editor_user_auth.bootstrapToken(token, () => {
 				this._checkAuth();
 				window.history.pushState({}, "", window.location.href.replace("?oauth_token="+token, ""));
 				localStorage.setItem("oauth_token", token);
@@ -98,15 +96,22 @@ class App {
 			this._checkAuth();
 			this.authWait = setInterval(this._checkAuth.bind(this), 100);
 		}
-		
-		PubSub.subscribe("UI.LOGIN.SURE", (msg, data) => {
-			opts.landing = window.location.pathname + window.location.hash;
-			this.auth.options(opts);
-			
-			if(!this.auth.authenticated()) {
-				this.auth.authenticate((err, res) => {
+
+		/**
+		 * Event for logging in user
+		 * @event APP.USER.LOGIN
+		 * @memberof App
+		 */
+		PubSub.subscribe("APP.USER.LOGIN", (msg, data) => {
+			opts.landing = window.EDITOR_URL + window.location.hash;
+			window.editor_user_auth.options(opts);
+
+			if(!window.editor_user_auth.authenticated()) {
+				window.editor_user_auth.authenticate((err, res) => {
 					if(err) {
-						PubSub.publish("UI.MESSAGE.BASIC", { type: "error", message: I18n.t("Oops ! Something went wrong when trying to log you in") });
+						console.error(err);
+						alert(I18n.t("Oops ! Something went wrong when trying to log you in"));
+						PubSub.publish("APP.USER.LOGOUT");
 					}
 					else {
 						this._checkAuth();
@@ -114,70 +119,76 @@ class App {
 				});
 			}
 		});
-		
-		PubSub.subscribe("UI.LOGOUT.WANTS", (msg, data) => {
-			if(this.auth && this.auth.authenticated()) {
-				this.auth.logout();
+
+		/**
+		 * Event for logging out user
+		 * @event APP.USER.LOGOUT
+		 * @memberof App
+		 */
+		PubSub.subscribe("APP.USER.LOGOUT", (msg, data) => {
+			if(window.editor_user_auth && window.editor_user_auth.authenticated()) {
+				window.editor_user_auth.logout();
 			}
-			
-			this.user = null;
+
+			window.editor_user = null;
 			localStorage.removeItem("oauth_token");
-			PubSub.publish("USER.INFO.READY", this.user);
-		});
-		
-		PubSub.subscribe("USER.INFO.WANTS", (msg, data) => {
-			PubSub.publish("USER.INFO.READY", this.user);
 		});
 	}
-	
+
 	/**
 	 * Check if authentication happened
 	 * @private
 	 */
 	_checkAuth() {
-		if(this.auth.authenticated()) {
+		if(window.editor_user_auth.authenticated()) {
 			if(this.authWait) {
 				clearInterval(this.authWait);
 			}
-			
+
 			//Get user details
-			this.auth.xhr({
+			window.editor_user_auth.xhr({
 				method: 'GET',
 				path: '/api/0.6/user/details'
 			}, (err, details) => {
 				if(err) {
 					console.log(err);
-					this.auth.logout();
+					window.editor_user_auth.logout();
 				}
 				else {
 					try {
-						this.user = {
+						window.editor_user = {
 							id: details.firstChild.childNodes[1].attributes.id.value,
 							name: details.firstChild.childNodes[1].attributes.display_name.value,
-							auth: this.auth
+							auth: window.editor_user_auth
 						};
-						
-						PubSub.publish("UI.LOGIN.DONE", { username: this.user.name });
+
+						/**
+						 * Event when user has been successfully logged in
+						 * @event APP.USER.READY
+						 * @memberof App
+						 */
+						PubSub.publish("APP.USER.READY", { username: window.editor_user.name });
+						console.log("Logged in as", window.editor_user.name);
 					}
 					catch(e) {
 						console.error(e);
-						PubSub.publish("UI.LOGOUT.WANTS");
+						PubSub.publish("APP.USER.LOGOUT");
 					}
 				}
 			});
 		}
 	}
-	
+
 	/**
 	 * Parse URL parameters
 	 * @private
 	 */
 	_readURLParams(str) {
 		const u = str.split('?');
-		
+
 		if(u.length > 1) {
 			const p = u[1].split('#')[0];
-			
+
 			return p.split('&').filter(function (pair) {
 				return pair !== '';
 			}).reduce(function(obj, pair){

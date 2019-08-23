@@ -9,16 +9,16 @@ import I18n from 'i18nline/lib/i18n';
 /**
  * DaysPicker allows to select days in a week.
  * Shown days are localized thanks to `toLocaleDateString` browser method.
- * 
- * @property {String} label Label for the field
- * @property {String[]} selection Values to show as selected
+ *
+ * @property {string} label Label for the field
+ * @property {string[]} selection Values to show as selected
  * @property {function} [onChange] Handler for value changes
  */
 class DaysPicker extends Component {
 	_getWeekDays(locale) {
 		let baseDate = new Date(Date.UTC(2017, 0, 2)); // just a Monday
 		const weekDays = [];
-		
+
 		for(let i = 0; i < 7; i++) {
 			weekDays.push({
 				val: baseDate.toLocaleDateString("en-GB", { weekday: "long" }).substring(0, 2).toLowerCase(),
@@ -26,33 +26,33 @@ class DaysPicker extends Component {
 			});
 			baseDate.setDate(baseDate.getDate() + 1);
 		}
-		
+
 		weekDays.push({ val: "ph", lbl: I18n.t("PH") });
-		
+
 		return weekDays;
 	}
-	
+
 	_onChange(evt) {
 		const clicked = evt.target.value;
 		let newList = this.props.selection.slice(0);
-		
+
 		if(!this.props.selection.includes(clicked)) {
 			newList.push(clicked);
 		}
 		else {
 			newList = newList.filter(v => v !== clicked);
 		}
-		
+
 		this.setState({ selected: newList });
-		
+
 		if(this.props.onChange) {
 			this.props.onChange(newList);
 		}
 	}
-	
+
 	render() {
 		const days = this._getWeekDays(I18n.locale);
-		
+
 		return <FormControl component="fieldset">
 			<FormLabel component="legend">{this.props.label}</FormLabel>
 			<FormGroup

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import ContentLineTrip from './ContentLineTrip';
+import I18n from 'i18nline/lib/i18n';
+import { Prompt } from 'react-router';
 import NavLines from './NavLines';
 import SummaryLineTrip from './SummaryLineTrip';
 
@@ -8,6 +10,14 @@ import SummaryLineTrip from './SummaryLineTrip';
  * LineTrip component manages the whole display of lines or trips.
  */
 class LineTrip extends Component {
+	constructor() {
+		super();
+
+		this.state = {
+			edits: null
+		};
+	}
+
 	render() {
 		const theProps = Object.assign({}, this.props, {
 			selectedLine: this.props.match.params.lid,
@@ -15,9 +25,19 @@ class LineTrip extends Component {
 		});
 
 		return theProps.selectedLine && theProps.lines && theProps.lines[theProps.selectedLine] ? <div>
+			<Prompt
+				when={this.state.edits !== null}
+				message={I18n.t("You have unsaved edits, if you leave these edits will be lost. Are you sure you want to leave the page ?")}
+			/>
+
 			<NavLines {...theProps} />
 			<SummaryLineTrip {...theProps} />
-			<ContentLineTrip {...theProps} />
+
+			<ContentLineTrip
+				{...theProps}
+				edits={this.state.edits}
+				onEdit={periods => this.setState({ edits: periods })}
+			/>
 		</div> : <div></div>;
 	}
 

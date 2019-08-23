@@ -1,10 +1,10 @@
 {
 	"editor_name": "Busy Hours",
-	"osm_api_url": "https://www.openstreetmap.org",
-	"oauth_consumer_key": "AimasFKiJ0yHaYnEsbLJR36rqYbcSfTV7YE0hXE0",
-	"oauth_secret": "8iAQyzFR1MiyO2oXSmCN8XDl7N0VraBWJZUDNvGK",
-	
-	"_osm_api_url": "https://master.apis.dev.openstreetmap.org",
-	"_oauth_consumer_key": "S1UcyQKeyEpa4fzoJhbffi5vCMELM2KrPoZUicag",
-	"_oauth_secret": "xjFttL8ano8nnj6zYK7QxyjQ1NI8HK8TnlTqhUVf"
+	"_osm_api_url": "https://www.openstreetmap.org",
+	"_oauth_consumer_key": "AimasFKiJ0yHaYnEsbLJR36rqYbcSfTV7YE0hXE0",
+	"_oauth_secret": "8iAQyzFR1MiyO2oXSmCN8XDl7N0VraBWJZUDNvGK",
+
+	"osm_api_url": "https://master.apis.dev.openstreetmap.org",
+	"oauth_consumer_key": "S1UcyQKeyEpa4fzoJhbffi5vCMELM2KrPoZUicag",
+	"oauth_secret": "xjFttL8ano8nnj6zYK7QxyjQ1NI8HK8TnlTqhUVf"
 }
