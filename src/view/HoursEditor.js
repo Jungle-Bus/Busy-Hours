@@ -4,6 +4,7 @@ import AlarmOff from 'mdi-react/AlarmOffIcon';
 import AlarmPlus from 'mdi-react/AlarmPlusIcon';
 import Button from '@material-ui/core/Button';
 import Cancel from 'mdi-react/CancelIcon';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import CloudUpload from 'mdi-react/CloudUploadIcon';
 import DaysPicker from './DaysPicker';
 import deepEqual from 'fast-deep-equal';
@@ -27,7 +28,8 @@ class HoursEditor extends Component {
 			periods: null,
 			showEmptyInterval: false,
 			alert: null,
-			notConnectedAlert: false
+			notConnectedAlert: false,
+			uploading: false
 		};
 	}
 
@@ -197,12 +199,14 @@ class HoursEditor extends Component {
 	 */
 	_onSend() {
 		if(this.state.periods && this.props.dataManager) {
+			this.setState({ uploading: true });
+
 			this.props.dataManager
 			.saveRelationPeriods("relation/"+this.props.relid, this.state.periods)
 			.then(() => {
 				// Clear tmp data
 				this.props.onEdit(null);
-				this.setState({ periods: null }, () => {
+				this.setState({ periods: null, uploading: false }, () => {
 					// Show success message
 					alert(I18n.t("Your edits were successfully sent to OSM"));
 
@@ -215,8 +219,10 @@ class HoursEditor extends Component {
 				let message = e.message ? e.message : e.toString();
 				if(message === "not_connected") { message = I18n.t("You have to be connected before sending your edits"); }
 				else if(message === "changeset_failed") { message = I18n.t("OSM server is not able to create a changeset for now"); }
+				else if(message === "cant_find_relation") { message = I18n.t("This public transport route is not available on OSM server"); }
+				else if(message === "sending_failed") { message = I18n.t("An error happened when sending your changes to OSM server"); }
 
-				this.setState({ alert: { message: message } }, () => {
+				this.setState({ uploading: false, alert: { message: message } }, () => {
 					setTimeout(() => this.setState({ alert: null }), 5000);
 				});
 			});
@@ -233,105 +239,112 @@ class HoursEditor extends Component {
 	}
 
 	render() {
-		const periods = this._getPeriods(true);
+		if(this.state.uploading) {
+			return <div style={{marginTop: 10, textAlign: "center"}}>
+				<CircularProgress style={{verticalAlign: "middle", marginRight: 10}} /> {I18n.t("Uploading your edits")}
+			</div>;
+		}
+		else {
+			const periods = this._getPeriods(true);
 
-		return <div style={{marginTop: 10}}>
-			{this.state.alert &&
-				<InAlert
-					level={this.state.alert.level || "warning"}
-					message={this.state.alert.message}
-				/>
-			}
+			return <div style={{marginTop: 10}}>
+				{this.state.alert &&
+					<InAlert
+						level={this.state.alert.level || "warning"}
+						message={this.state.alert.message}
+					/>
+				}
 
-			{this.state.periods &&
-				<Grid container alignItems="center" spacing={2} style={{marginBottom: 10}}>
-					<Grid item xs={12} sm={6}>
-						{I18n.t("You have edited this line hours.")}
-					</Grid>
-					<Grid item xs={6} sm={3}>
-						<Button
-							variant="contained"
-							color="primary"
-							style={{width: "100%"}}
-							onClick={() => this._onSend()}
-						>
-							<CloudUpload /> {I18n.t("Send to OSM")}
-						</Button>
-					</Grid>
-					<Grid item xs={6} sm={3}>
-						<Button
-							variant="contained"
-							color="secondary"
-							style={{width: "100%"}}
-							onClick={() => this._onCancel()}
-						>
-							<Cancel /> {I18n.t("Cancel all")}
-						</Button>
-					</Grid>
-				</Grid>
-			}
-
-			{periods && periods.map((intv, pid) => {
-				const intervalsSorted = Object.entries(intv.intervals).sort((a,b) => a[0].localeCompare(b[0]));
-
-				return <Paper style={{padding: 10, marginBottom: 20}} key={pid}>
-					<Grid container alignItems="center">
+				{this.state.periods &&
+					<Grid container alignItems="center" spacing={2} style={{marginBottom: 10}}>
 						<Grid item xs={12} sm={6}>
-							<DaysPicker
-								label={I18n.t("Days concerned")}
-								selection={intv.days}
-								onChange={days => this._editPeriodDays(pid, days)}
-							/>
-
+							{I18n.t("You have edited this line hours.")}
+						</Grid>
+						<Grid item xs={6} sm={3}>
 							<Button
-								style={{marginTop: 10}}
-								onClick={() => this._deletePeriod(pid)}
+								variant="contained"
+								color="primary"
+								style={{width: "100%"}}
+								onClick={() => this._onSend()}
 							>
-								<AlarmOff /> {I18n.t("Delete this period")}
+								<CloudUpload /> {I18n.t("Send to OSM")}
 							</Button>
 						</Grid>
-						<Grid item xs={12} sm={6}>
-							{intervalsSorted.map((e,itid) => {
-								const [ hour, min ] = e;
-								return <TimePeriodPicker
-									fromHour={hour.split("-")[0]}
-									toHour={hour.split("-")[1]}
-									interval={min}
-									key={itid}
-									onChange={(nextHour, nextInterval) => this._editPeriodInterval(pid, hour, nextHour, nextInterval)}
-									onDelete={() => this._deletePeriodInterval(pid, hour)}
-								/>;
-							})}
-
-							{this.state.showEmptyInterval === pid &&
-								<TimePeriodPicker
-									fromHour={intervalsSorted.length > 0 ? intervalsSorted[intervalsSorted.length-1][0].split("-")[1] : null}
-									onChange={(nextHour, nextInterval) => this._addPeriodInterval(pid, nextHour, nextInterval)}
-									onDelete={() => this.setState({ showEmptyInterval: false })}
-								/>
-							}
-
+						<Grid item xs={6} sm={3}>
 							<Button
+								variant="contained"
 								color="secondary"
-								style={{marginTop: 10}}
-								onClick={() => this.setState({ showEmptyInterval: pid })}
+								style={{width: "100%"}}
+								onClick={() => this._onCancel()}
 							>
-								<AlarmPlus /> {I18n.t("Add a new interval")}
+								<Cancel /> {I18n.t("Cancel all")}
 							</Button>
 						</Grid>
 					</Grid>
-				</Paper>;
-			})}
+				}
 
-			<Button
-				color="secondary"
-				style={{marginTop: 10}}
-				onClick={() => this._addPeriod()}
-			>
-				<AlarmPlus /> {I18n.t("Add a new period")}
-			</Button>
+				{periods && periods.map((intv, pid) => {
+					const intervalsSorted = Object.entries(intv.intervals).sort((a,b) => a[0].localeCompare(b[0]));
 
-		</div>;
+					return <Paper style={{padding: 10, marginBottom: 20}} key={pid}>
+						<Grid container alignItems="center">
+							<Grid item xs={12} sm={6}>
+								<DaysPicker
+									label={I18n.t("Days concerned")}
+									selection={intv.days}
+									onChange={days => this._editPeriodDays(pid, days)}
+								/>
+
+								<Button
+									style={{marginTop: 10}}
+									onClick={() => this._deletePeriod(pid)}
+								>
+									<AlarmOff /> {I18n.t("Delete this period")}
+								</Button>
+							</Grid>
+							<Grid item xs={12} sm={6}>
+								{intervalsSorted.map((e,itid) => {
+									const [ hour, min ] = e;
+									return <TimePeriodPicker
+										fromHour={hour.split("-")[0]}
+										toHour={hour.split("-")[1]}
+										interval={min}
+										key={itid}
+										onChange={(nextHour, nextInterval) => this._editPeriodInterval(pid, hour, nextHour, nextInterval)}
+										onDelete={() => this._deletePeriodInterval(pid, hour)}
+									/>;
+								})}
+
+								{this.state.showEmptyInterval === pid &&
+									<TimePeriodPicker
+										fromHour={intervalsSorted.length > 0 ? intervalsSorted[intervalsSorted.length-1][0].split("-")[1] : null}
+										onChange={(nextHour, nextInterval) => this._addPeriodInterval(pid, nextHour, nextInterval)}
+										onDelete={() => this.setState({ showEmptyInterval: false })}
+									/>
+								}
+
+								<Button
+									color="secondary"
+									style={{marginTop: 10}}
+									onClick={() => this.setState({ showEmptyInterval: pid })}
+								>
+									<AlarmPlus /> {I18n.t("Add a new interval")}
+								</Button>
+							</Grid>
+						</Grid>
+					</Paper>;
+				})}
+
+				<Button
+					color="secondary"
+					style={{marginTop: 10}}
+					onClick={() => this._addPeriod()}
+				>
+					<AlarmPlus /> {I18n.t("Add a new period")}
+				</Button>
+
+			</div>;
+		}
 	}
 
 	componentDidMount() {

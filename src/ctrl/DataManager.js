@@ -185,6 +185,17 @@ class DataManager {
 			return e;
 		}
 
+		// Retrieve data from OSM server (to ensure we have latest version)
+		let osmElement;
+		try {
+			osmElement = await this._osmApi.fetchElement(relationId);
+			if(!osmElement) { throw new Error(); }
+		}
+		catch(e) {
+			console.error(e);
+			return new Error("cant_find_relation");
+		}
+
 		// Create changeset
 		let changesetId;
 		try {
@@ -195,12 +206,36 @@ class DataManager {
 			);
 		}
 		catch(e) {
+			console.error(e);
 			return new Error("changeset_failed");
 		}
 
-		//TODO Send data to OSM
-		if(newTags && changesetId) {
-			console.log(relationId, newTags);
+		// Send data to OSM
+		if(newTags && changesetId && osmElement) {
+			osmElement = this._osmApi.setTags(osmElement, newTags);
+			osmElement = this._osmApi.setTimestampToNow(osmElement);
+
+			let result;
+			try {
+				result = await this._osmApi.sendElement(osmElement, changesetId);
+				if(isNaN(result)) {
+					throw new Error("Version number invalid", result);
+				}
+			}
+			catch(e) {
+				console.error(e);
+				return new Error("sending_failed");
+			}
+
+			// Close changeset
+			try {
+				await this._osmApi.closeChangeset(changesetId);
+			}
+			catch(e) {
+				console.error("Changeset was not closed, will be automatically closed after 30 minutes");
+			}
+
+			return true;
 		}
 	}
 }
