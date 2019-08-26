@@ -59,6 +59,10 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_addPeriod() {
+		if(!window.editor_user || !window.editor_user_auth) {
+			return null;
+		}
+
 		const periods = this._copyPeriods(this._getPeriods());
 
 		if(periods.length === 0) {
@@ -92,6 +96,10 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_editPeriodDays(id, days) {
+		if(!window.editor_user || !window.editor_user_auth) {
+			return null;
+		}
+
 		const periods = this._copyPeriods(this._getPeriods(true));
 
 		if(days && periods[id]) {
@@ -106,6 +114,10 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_addPeriodInterval(pid, hour, interval) {
+		if(!window.editor_user || !window.editor_user_auth) {
+			return null;
+		}
+
 		const periods = this._copyPeriods(this._getPeriods(true));
 
 		if(periods[pid] && hour && interval) {
@@ -120,6 +132,10 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_editPeriodInterval(pid, prevHour, nextHour, nextInterval) {
+		if(!window.editor_user || !window.editor_user_auth) {
+			return null;
+		}
+
 		const periods = this._copyPeriods(this._getPeriods(true));
 
 		if(periods[pid] && periods[pid].intervals[prevHour]) {
@@ -170,6 +186,10 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_deletePeriodInterval(pid, hour) {
+		if(!window.editor_user || !window.editor_user_auth) {
+			return null;
+		}
+
 		const periods = this._copyPeriods(this._getPeriods(true));
 
 		if(periods[pid] && periods[pid].intervals[hour]) {
@@ -184,6 +204,10 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_deletePeriod(pid) {
+		if(!window.editor_user || !window.editor_user_auth) {
+			return null;
+		}
+
 		const periods = this._copyPeriods(this._getPeriods(true));
 
 		if(periods[pid]) {
@@ -255,7 +279,7 @@ class HoursEditor extends Component {
 					/>
 				}
 
-				{this.state.periods &&
+				{window.editor_user && window.editor_user_auth && this.state.periods &&
 					<Grid container alignItems="center" spacing={2} style={{marginBottom: 10}}>
 						<Grid item xs={12} sm={6}>
 							{I18n.t("You have edited this line hours.")}
