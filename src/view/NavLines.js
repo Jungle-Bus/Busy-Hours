@@ -19,13 +19,25 @@ class NavLines extends Component {
 				{I18n.t("Home")}
 			</Link>
 
-			{line &&
+			{line && line.rawTags.route_master &&
 				<Link to={"/line/"+this.props.selectedLine} style={stLink}>
 					{I18n.t("Line")}
 					<transport-thumbnail
 						data-transport-mode={line.type}
 						data-transport-line-code={line.ref}
 						data-transport-line-color={line.colour}>
+					</transport-thumbnail>
+				</Link>
+			}
+
+			{line && !line.rawTags.route_master && !trip &&
+				<Link to={"/line/"+this.props.selectedLine} style={stLink}>
+					{I18n.t("Trip")}
+					<transport-thumbnail
+						data-transport-mode={line.type}
+						data-transport-line-code={line.ref}
+						data-transport-line-color={line.colour}
+						data-transport-destination={line.to}>
 					</transport-thumbnail>
 				</Link>
 			}

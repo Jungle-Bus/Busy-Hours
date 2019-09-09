@@ -18,33 +18,35 @@ const ERROR_DETAILS = {
 class DataLoader extends Component {
 	constructor() {
 		super();
-		
+
 		this.state = {
 			loading: true,
 			error: false
 		};
 	}
-	
+
 	render() {
+		const relId = this.props.match.params.rid;
 		return <div style={{textAlign: "center", padding: 30}}>
 			{this.state.loading &&
 				<CircularProgress size={50} />
 			}
-			
+
 			{this.state.error && ERROR_DETAILS[this.state.error] &&
 				<InAlert
 					message={ERROR_DETAILS[this.state.error]}
+					relationId={relId}
 					level="error"
 				/>
 			}
-			
+
 			{this.state.error === "invalid_id" &&
 				<InAlert
 					message={I18n.t("The given relation ID is invalid. Please only give the number in the relation ID (example : 1234).")}
 					level="warning"
 				/>
 			}
-			
+
 			{this.state.error === "api_failed" &&
 				<InAlert
 					message={I18n.t("Oops ! OpenStreetMap API seems unavailable. Please retry a bit later.")}
@@ -53,24 +55,24 @@ class DataLoader extends Component {
 			}
 		</div>;
 	}
-	
+
 	componentDidMount() {
 		const relId = this.props.match.params.rid;
 		if(!isNaN(parseInt(relId))) {
 			this.setState({ loading: true, error: false });
-			
+
 			// Load the relation
 			this.props.dataManager
 			.loadDataFromRelation("relation/"+relId)
 			.then(data => {
 				this.setState({ loading: false, error: false });
 				this.props.onDataLoaded(data);
-				
+
 				// Redirect to proper page
 				const lineIds = Object.keys(data);
 				if(lineIds.length > 0) {
 					const page = lineIds.includes(relId) ? "/line/" + relId : "/line/" + lineIds[0] + "/trip/" + relId;
-					
+
 					if(this.props.history.location.pathname !== page) {
 						this.props.history.push(page);
 					}
