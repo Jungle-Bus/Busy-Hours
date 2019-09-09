@@ -37,8 +37,7 @@ class ContentTripLine extends Component {
 				textColor="primary"
 			>
 				<Tab label={I18n.t("Hours")} />
-				{!trip && line.trips && <Tab label={I18n.t("Trips")} />
-}
+				{!trip && line.trips && <Tab label={I18n.t("Trips")} />}
 			</Tabs>
 
 			{((!trip && this.state.tab === 0) || trip) && <div>
@@ -86,8 +85,7 @@ class ContentTripLine extends Component {
 									component={Link}
 									to={"/line/"+this.props.selectedLine+"/trip/"+tid}
 								>
-									<CalendarEdit />
- {I18n.t("Edit hours")}
+									<CalendarEdit /> {I18n.t("Edit hours")}
 								</Button>
 							</ListItemSecondaryAction>
 						</ListItem>;

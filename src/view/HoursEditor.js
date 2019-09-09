@@ -1,19 +1,17 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import AlarmOff from 'mdi-react/AlarmOffIcon';
 import AlarmPlus from 'mdi-react/AlarmPlusIcon';
 import Button from '@material-ui/core/Button';
 import Cancel from 'mdi-react/CancelIcon';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import CloudUpload from 'mdi-react/CloudUploadIcon';
-import DaysPicker from './DaysPicker';
 import deepEqual from 'fast-deep-equal';
 import Grid from '@material-ui/core/Grid';
 import I18n from 'i18nline/lib/i18n';
 import InAlert from './InAlert';
 import Paper from '@material-ui/core/Paper';
+import PeriodEditor from './PeriodEditor';
 import PubSub from 'pubsub-js';
-import TimePeriodPicker from './TimePeriodPicker';
 
 const DEFAULT_PERIOD = { days: ["mo","tu","we","th","fr"], intervals: {} };
 
@@ -26,11 +24,12 @@ class HoursEditor extends Component {
 
 		this.state = {
 			periods: null,
-			showEmptyInterval: false,
 			alert: null,
 			notConnectedAlert: false,
 			uploading: false
 		};
+
+		this._busyPeriods = new Set();
 	}
 
 	/**
@@ -66,7 +65,8 @@ class HoursEditor extends Component {
 		const periods = this._copyPeriods(this._getPeriods());
 
 		if(periods.length === 0) {
-			this.setState({ periods: [ DEFAULT_PERIOD ] });
+			this._busyPeriods.add(0);
+			this.props.onEdit([ DEFAULT_PERIOD ]);
 		}
 		else {
 			// Find first unused day
@@ -86,117 +86,31 @@ class HoursEditor extends Component {
 				intervals: {}
 			});
 
-			this.setState({ periods: periods });
+			this._busyPeriods.add(periods.length-1);
 			this.props.onEdit(periods);
 		}
 	}
 
 	/**
-	 * Edit days of an existing period
+	 * Changes a period definition
 	 * @private
 	 */
-	_editPeriodDays(id, days) {
+	_updatePeriod(pid, period) {
 		if(!window.editor_user || !window.editor_user_auth) {
 			return null;
 		}
 
-		const periods = this._copyPeriods(this._getPeriods(true));
+		const periods = this._copyPeriods(this._getPeriods());
 
-		if(days && periods[id]) {
-			periods[id].days = days;
-			this.setState({ periods: periods });
+		if(periods[pid]) {
+			periods[pid] = period;
+			this._busyPeriods.delete(pid);
 			this.props.onEdit(periods);
 		}
 	}
 
-	/**
-	 * Add new interval in an existing period
-	 * @private
-	 */
-	_addPeriodInterval(pid, hour, interval) {
-		if(!window.editor_user || !window.editor_user_auth) {
-			return null;
-		}
-
-		const periods = this._copyPeriods(this._getPeriods(true));
-
-		if(periods[pid] && hour && interval) {
-			periods[pid].intervals[hour] = interval;
-			this.setState({ periods: periods, showEmptyInterval: false });
-			this.props.onEdit(periods);
-		}
-	}
-
-	/**
-	 * Edit one interval of an existing period
-	 * @private
-	 */
-	_editPeriodInterval(pid, prevHour, nextHour, nextInterval) {
-		if(!window.editor_user || !window.editor_user_auth) {
-			return null;
-		}
-
-		const periods = this._copyPeriods(this._getPeriods(true));
-
-		if(periods[pid] && periods[pid].intervals[prevHour]) {
-			const prevInterval = periods[pid].intervals[prevHour];
-
-			// Hour change
-			if(nextHour !== prevHour) {
-				const [ prevStartH, prevEndH ] = prevHour.split("-");
-				const [ nextStartH, nextEndH ] = nextHour.split("-");
-				delete periods[pid].intervals[prevHour];
-
-				// Look for other intervals having same start/end hour (to make coherent change)
-				if(prevStartH !== nextStartH) {
-					Object.keys(periods[pid].intervals).forEach(currHour => {
-						const [ currStartH, currEndH ] = currHour.split("-");
-						if(currEndH === prevStartH) {
-							periods[pid].intervals[currStartH+"-"+nextStartH] = periods[pid].intervals[currHour];
-							delete periods[pid].intervals[currHour];
-						}
-					});
-				}
-
-				if(prevEndH !== nextEndH) {
-					Object.keys(periods[pid].intervals).forEach(currHour => {
-						const [ currStartH, currEndH ] = currHour.split("-");
-						if(currStartH === prevEndH) {
-							periods[pid].intervals[nextEndH+"-"+currEndH] = periods[pid].intervals[currHour];
-							delete periods[pid].intervals[currHour];
-						}
-					});
-				}
-
-				// Save new interval
-				periods[pid].intervals[nextHour] = nextInterval;
-			}
-			// Interval change
-			else if(prevInterval !== nextInterval) {
-				periods[pid].intervals[prevHour] = nextInterval;
-			}
-
-			this.setState({ periods: periods });
-			this.props.onEdit(periods);
-		}
-	}
-
-	/**
-	 * Delete a given interval for selected period
-	 * @private
-	 */
-	_deletePeriodInterval(pid, hour) {
-		if(!window.editor_user || !window.editor_user_auth) {
-			return null;
-		}
-
-		const periods = this._copyPeriods(this._getPeriods(true));
-
-		if(periods[pid] && periods[pid].intervals[hour]) {
-			delete periods[pid].intervals[hour];
-			this.setState({ periods: periods });
-			this.props.onEdit(periods);
-		}
+	_busyPeriod(pid) {
+		this._busyPeriods.add(pid);
 	}
 
 	/**
@@ -208,11 +122,11 @@ class HoursEditor extends Component {
 			return null;
 		}
 
-		const periods = this._copyPeriods(this._getPeriods(true));
+		const periods = this._copyPeriods(this._getPeriods());
 
 		if(periods[pid]) {
 			periods.splice(pid, 1);
-			this.setState({ periods: periods });
+			this._busyPeriods.delete(pid);
 			this.props.onEdit(periods);
 		}
 	}
@@ -222,7 +136,13 @@ class HoursEditor extends Component {
 	 * @private
 	 */
 	_onSend() {
-		if(this.state.periods && this.props.dataManager) {
+		if(this._busyPeriods.size > 0) {
+			PubSub.publish("UI.MESSAGE.BASIC", { message: I18n.t("Some periods are incomplete, please check your data before uploading") });
+		}
+		else if(this.state.periods.length === 0) {
+			PubSub.publish("UI.MESSAGE.BASIC", { message: I18n.t("No period has been added, please add information about this line opening hours") });
+		}
+		else if(this.state.periods && this.props.dataManager) {
 			this.setState({ uploading: true });
 
 			this.props.dataManager
@@ -259,6 +179,7 @@ class HoursEditor extends Component {
 	 */
 	_onCancel() {
 		this.setState({ periods: null });
+		this._busyPeriods.clear();
 		this.props.onEdit(null);
 	}
 
@@ -269,7 +190,7 @@ class HoursEditor extends Component {
 			</div>;
 		}
 		else {
-			const periods = this._getPeriods(true);
+			const periods = this._getPeriods();
 
 			return <div style={{marginTop: 10}}>
 				{this.state.alert &&
@@ -307,57 +228,16 @@ class HoursEditor extends Component {
 					</Grid>
 				}
 
-				{periods && periods.map((intv, pid) => {
-					const intervalsSorted = Object.entries(intv.intervals).sort((a,b) => a[0].localeCompare(b[0]));
-
-					return <Paper style={{padding: 10, marginBottom: 20}} key={pid}>
-						<Grid container alignItems="center">
-							<Grid item xs={12} sm={6}>
-								<DaysPicker
-									label={I18n.t("Days concerned")}
-									selection={intv.days}
-									onChange={days => this._editPeriodDays(pid, days)}
-								/>
-
-								<Button
-									style={{marginTop: 10}}
-									onClick={() => this._deletePeriod(pid)}
-								>
-									<AlarmOff /> {I18n.t("Delete this period")}
-								</Button>
-							</Grid>
-							<Grid item xs={12} sm={6}>
-								{intervalsSorted.map((e,itid) => {
-									const [ hour, min ] = e;
-									return <TimePeriodPicker
-										fromHour={hour.split("-")[0]}
-										toHour={hour.split("-")[1]}
-										interval={min}
-										key={itid}
-										onChange={(nextHour, nextInterval) => this._editPeriodInterval(pid, hour, nextHour, nextInterval)}
-										onDelete={() => this._deletePeriodInterval(pid, hour)}
-									/>;
-								})}
-
-								{this.state.showEmptyInterval === pid &&
-									<TimePeriodPicker
-										fromHour={intervalsSorted.length > 0 ? intervalsSorted[intervalsSorted.length-1][0].split("-")[1] : null}
-										onChange={(nextHour, nextInterval) => this._addPeriodInterval(pid, nextHour, nextInterval)}
-										onDelete={() => this.setState({ showEmptyInterval: false })}
-									/>
-								}
-
-								<Button
-									color="secondary"
-									style={{marginTop: 10}}
-									onClick={() => this.setState({ showEmptyInterval: pid })}
-								>
-									<AlarmPlus /> {I18n.t("Add a new interval")}
-								</Button>
-							</Grid>
-						</Grid>
-					</Paper>;
-				})}
+				{periods && periods.map((intv, pid) => (
+					<Paper style={{padding: 10, marginBottom: 20}} key={pid}>
+						<PeriodEditor
+							period={intv}
+							onValid={p => this._updatePeriod(pid, p)}
+							onInvalid={() => this._busyPeriod(pid)}
+							onDelete={() => this._deletePeriod(pid)}
+						/>
+					</Paper>
+				))}
 
 				<Button
 					color="secondary"

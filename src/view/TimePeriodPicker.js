@@ -85,6 +85,9 @@ class TimePeriodPicker extends Component {
 				this.props.onChange(fromHour + "-" + toHour, parseInt(newState.interval));
 			}, 1000);
 		}
+		else {
+			this.props.onInvalid();
+		}
 
 		this.setState(newState);
 	}
