@@ -46,8 +46,22 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ## Translations
 
-Translations of user interface labels are managed using JSON configuration files, automatically generated using `i18nline` tool. When editing code, launch manually `npm run i18n:build` to update these configuration files.
+You can contribue to the translation of the user interface on [Transifex](https://www.transifex.com/jungle-bus/busy-hours/dashboard/).
 
+Translation stings  are managed using JSON configuration files, automatically generated using `i18nline` tool. When editing code, launch manually `npm run i18n:build` to update these configuration files. They will be uploaded to Transifex when they will be merged in `master` branch.
+
+When a language is full translated, a PR will be automatically created from Transifex. We need to launch `npm run i18n:fix` before merging.
+
+#### Transifex config
+```
+filters:
+  - filter_type: file
+    file_format: KEYVALUEJSON
+    source_language: en
+    source_file: src/config/locales/en.json
+    translation_files_expression: src/config/locales/<lang>.json
+```
+[Doc](https://docs.transifex.com/transifex-github-integrations/github-tx-ui)
 
 ## Documentation
 
