@@ -11,9 +11,7 @@
     "doc:js": "documentation build ./src -f html -o doc/",
     "doc:js:check": "documentation lint ./src",
     "i18n:build": "i18nline export",
-    "i18n:upload": "tx push -s",
-    "i18n:status": "tx status",
-    "i18n:download": "tx pull -a --mode reviewed --minimum-perc=75 && node fix_i18n_files.js",
+    "i18n:fix": "node fix_i18n_files.js",
     "i18n:clean": "find ./src/config/locales -type f -not -name 'en.json' -delete",
     "clean": "rm -rf build/*"
   },
