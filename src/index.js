@@ -11,7 +11,7 @@ import PubSub from 'pubsub-js';
  * Global variables definition
  */
 window.EDITOR_NAME = CONFIG.editor_name;
-const LOCALES = [ "en" ];
+const LOCALES = [ "en", "fr" ];
 window.EDITOR_URL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/";
 
 /**
