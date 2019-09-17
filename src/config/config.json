@@ -1,8 +1,5 @@
 {
-	"editor_name": "Busy Hours",
-	"_osm_api_url": "https://www.openstreetmap.org",
-	"_oauth_consumer_key": "AimasFKiJ0yHaYnEsbLJR36rqYbcSfTV7YE0hXE0",
-	"_oauth_secret": "8iAQyzFR1MiyO2oXSmCN8XDl7N0VraBWJZUDNvGK",
+	"editor_name": "Busy Hours Dev",
 
 	"osm_api_url": "https://master.apis.dev.openstreetmap.org",
 	"oauth_consumer_key": "YcyRuhCSFKCRWJ71sr5CloOxCR2gyQZz92t1UInz",
