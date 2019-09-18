@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - 9
+
+script:
+  - mv src/config/prod_config.json src/config/config.json
+  - npm run build
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_DEPLOY_TOKEN
+  local_dir: build
+  on:
+    branch: master
