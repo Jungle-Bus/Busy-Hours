@@ -1,7 +1,11 @@
 ![logo Busy Hours](https://raw.githubusercontent.com/Jungle-Bus/resources/master/logo/Logo_Jungle_Bus-Busy_Hours.png)
 
 
-Busy Hours is web tool to allow easy editing of OpenStreetMap public transport hours.
+Busy Hours is web tool to allow easy editing of OpenStreetMap public transport hours. [Give it a try ! ](https://jungle-bus.github.io/Busy-Hours/)
+
+![screenshot](screenshot.png)
+
+In Busy Hours, you can view public transport lines (`route` or `route_master` relations) and set the operating hours, the peak and off-peak hours and frequencies at these times. It uses the `interval`, `interval:conditional` and `opening_hours` tags documented on [OSM wiki](https://wiki.openstreetmap.org/wiki/Key:interval).
 
 
 ## Usage
@@ -47,11 +51,11 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ## Translations
 
-You can contribue to the translation of the user interface on [Transifex](https://www.transifex.com/jungle-bus/busy-hours/dashboard/).
+You can contribute to the translation of the user interface on [Transifex](https://www.transifex.com/jungle-bus/busy-hours/dashboard/).
 
 Translation stings  are managed using JSON configuration files, automatically generated using `i18nline` tool. When editing code, launch manually `npm run i18n:build` to update these configuration files. They will be uploaded to Transifex when they will be merged in `master` branch.
 
-When a language is full translated, a PR will be automatically created from Transifex. We need to launch `npm run i18n:fix` before merging.
+When a language is fully translated, a PR will be automatically created from Transifex. We need to launch `npm run i18n:fix` before merging.
 
 #### Transifex config
 ```
