@@ -1,0 +1,78 @@
+{
+    "data_format": 1,
+    "project": {
+        "name": "Busy Hours",
+        "description": "Easy editing of OpenStreetMap public transport hours",
+        "project_url": "https://jungle-bus.github.io/Busy-Hours/#/",
+        "contact_name": "Noémie Lehuby",
+        "contact_email": "noemie@junglebus.io"
+    },
+    "tags": [{
+            "key": "type",
+            "value": "route_master",
+            "object_types": ["relation"],
+            "description": "to select the public transport line objects"
+        },
+        {
+            "key": "type",
+            "value": "route",
+            "object_types": ["relation"],
+            "description": "to select the public transport route objects"
+        },
+        {
+            "key": "ref",
+            "object_types": ["relation"],
+            "description": "the code of the public transport line/route"
+        },
+        {
+            "key": "to",
+            "object_types": ["relation"],
+            "description": "the destination of the public transport route"
+        },
+        {
+            "key": "from",
+            "object_types": ["relation"],
+            "description": "the origin of the public transport route"
+        },
+        {
+            "key": "colour",
+            "object_types": ["relation"],
+            "description": "the colour of the public transport line/route"
+        },
+        {
+            "key": "operator",
+            "object_types": ["relation"],
+            "description": "the name of the public transport operator"
+        },
+        {
+            "key": "network",
+            "object_types": ["relation"],
+            "description": "the name of the public transport network"
+        },
+        {
+            "key": "route",
+            "object_types": ["relation"],
+            "description": "the public transport mode of the route"
+        },
+        {
+            "key": "route_master",
+            "object_types": ["relation"],
+            "description": "the public transport mode of the line"
+        },
+        {
+            "key": "interval",
+            "object_types": ["relation"],
+            "description": "the main frequency of the public transport line. Can be set in Busy Hours."
+        },
+        {
+            "key": "interval:conditional",
+            "object_types": ["relation"],
+            "description": "the exceptions to the main frequency. Can be set in Busy Hours"
+        },
+        {
+            "key": "opening_hours",
+            "object_types": ["relation"],
+            "description": "the operating hours of the public transport line. Can be set in Busy Hours"
+        }
+    ]
+}
