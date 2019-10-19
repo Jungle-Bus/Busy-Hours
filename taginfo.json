@@ -25,16 +25,6 @@
             "description": "the code of the public transport line/route"
         },
         {
-            "key": "to",
-            "object_types": ["relation"],
-            "description": "the destination of the public transport route"
-        },
-        {
-            "key": "from",
-            "object_types": ["relation"],
-            "description": "the origin of the public transport route"
-        },
-        {
             "key": "colour",
             "object_types": ["relation"],
             "description": "the colour of the public transport line/route"
