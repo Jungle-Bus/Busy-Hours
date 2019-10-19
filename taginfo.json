@@ -4,6 +4,8 @@
         "name": "Busy Hours",
         "description": "Easy editing of OpenStreetMap public transport hours",
         "project_url": "https://jungle-bus.github.io/Busy-Hours/#/",
+        "doc_url": "https://github.com/Jungle-Bus/Busy-Hours",
+        "icon_url": "https://raw.githubusercontent.com/Jungle-Bus/resources/master/logo/Logo_Jungle_Bus-Busy_Hours.png",
         "contact_name": "Noémie Lehuby",
         "contact_email": "noemie@junglebus.io"
     },
