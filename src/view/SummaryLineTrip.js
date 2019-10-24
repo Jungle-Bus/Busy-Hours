@@ -51,6 +51,10 @@ class SummaryTripLine extends Component {
 				<InAlert message={I18n.t("This line has no interval defined, but its opening hours are:")+" "+linetrip.rawTags.opening_hours} />
 			}
 
+			{linetrip && linetrip.defaultInterval === "unset" && linetrip.otherIntervals === "unset" && linetrip.opens === "unset" &&
+				<InAlert message={I18n.t("This line has no opening hours or interval defined, you can start adding periods")} />
+			}
+
 			{linetrip && (linetrip.defaultInterval === "invalid" || linetrip.otherIntervals === "invalid" || linetrip.opens === "invalid") &&
 				<InAlert level="warning" message={I18n.t("Some attributes of this line are invalid, please check and correct hours.")} />
 			}

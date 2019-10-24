@@ -16,6 +16,8 @@ import LineTrip from './LineTrip';
 import LoginDialog from './LoginDialog';
 import Welcome from './Welcome';
 
+const STORAGE_ID = "previous_lines";
+
 /**
  * Body is the view main class.
  * It creates all other component in cascade.
@@ -42,9 +44,45 @@ class Body extends Component {
 		this.state = {};
 	}
 
+	/**
+	 * Get the list of previously loaded lines from local storage
+	 * @private
+	 */
+	_getPreviousLinesInStorage() {
+		return JSON.parse(window.localStorage.getItem(STORAGE_ID) || '{}');
+	}
+
 	_onDataLoaded(newData) {
 		this.setState({ lines: newData });
 		console.log("Loaded data", newData);
+
+		// Append loaded data into localStorage
+		const inStore = this._getPreviousLinesInStorage();
+		const toAppend = {};
+		Object.entries(newData).forEach(e => {
+			const [ id, val ] = e;
+			toAppend[id] = {
+				colour: val.colour,
+				name: val.name,
+				ref: val.ref,
+				type: val.type,
+				operator: val.operator,
+				ts: parseInt(Math.floor(Date.now() / 1000)) // To allow sort
+			};
+		});
+
+		try {
+			window.localStorage.setItem(STORAGE_ID, JSON.stringify(Object.assign(inStore, toAppend)));
+		}
+		catch(e) {
+			try {
+				window.localStorage.clear();
+				window.localStorage.setItem(STORAGE_ID, JSON.stringify(toAppend));
+			}
+			catch(e) {
+				console.error(e);
+			}
+		}
 	}
 
 	render() {
@@ -54,7 +92,16 @@ class Body extends Component {
 					<Header {...this.state} />
 
 					<Container maxWidth="md" style={{marginTop: 20, marginBottom: 20}}><Switch>
-						<Route exact path='/' component={Welcome} />
+						<Route
+							exact
+							path='/'
+							render={props => (
+								<Welcome
+									{...props}
+									previousLines={this._getPreviousLinesInStorage()}
+								/>
+							)}
+						/>
 
 						<Route
 							exact

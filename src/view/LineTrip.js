@@ -27,7 +27,11 @@ class LineTrip extends Component {
 		return theProps.selectedLine && theProps.lines && theProps.lines[theProps.selectedLine] ? <div>
 			<Prompt
 				when={this.state.edits !== null}
-				message={I18n.t("You have unsaved edits, if you leave these edits will be lost. Are you sure you want to leave the page ?")}
+				message={location => (
+					location.pathname === theProps.history.location.pathname ?
+					true
+					: I18n.t("You have unsaved edits, if you leave these edits will be lost. Are you sure you want to leave the page ?")
+				)}
 			/>
 
 			<NavLines {...theProps} />

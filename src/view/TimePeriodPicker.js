@@ -7,6 +7,8 @@ import I18n from 'i18nline/lib/i18n';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
 import { TimePicker } from "@material-ui/pickers";
+// import { useTheme } from '@material-ui/core/styles';
+// import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 /**
  * TimePeriodPicker allows to select an hour range.
@@ -93,6 +95,9 @@ class TimePeriodPicker extends Component {
 	}
 
 	render() {
+// 		const theme = useTheme();
+// 		const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
 		return <FormControl component="fieldset" style={{display: "block"}}>
 			<FormGroup
 				value={this.props.value}
