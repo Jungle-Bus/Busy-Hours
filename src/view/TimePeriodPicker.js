@@ -6,9 +6,8 @@ import FormControl from '@material-ui/core/FormControl';
 import I18n from 'i18nline/lib/i18n';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
-import { TimePicker } from "@material-ui/pickers";
-// import { useTheme } from '@material-ui/core/styles';
-// import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { KeyboardTimePicker, TimePicker } from "@material-ui/pickers";
+import withWidth from '@material-ui/core/withWidth';
 
 /**
  * TimePeriodPicker allows to select an hour range.
@@ -95,8 +94,7 @@ class TimePeriodPicker extends Component {
 	}
 
 	render() {
-// 		const theme = useTheme();
-// 		const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+		const isMobile = this.props.width === "xs";
 
 		return <FormControl component="fieldset" style={{display: "block"}}>
 			<FormGroup
@@ -104,23 +102,47 @@ class TimePeriodPicker extends Component {
 				row
 				style={{marginTop: 5, display: "flex", justifyContent: "space-between"}}
 			>
-				<TimePicker
-					ampm={false}
-					initialFocusedDate={new Date("1970-01-01T00:00:00")}
-					value={this.state.fromDate}
-					label={I18n.t("From")}
-					style={{width: 80}}
-					onChange={d => this._onChange("fromDate", d)}
-				/>
+				{isMobile ?
+					<TimePicker
+						ampm={false}
+						initialFocusedDate={new Date("1970-01-01T00:00:00")}
+						value={this.state.fromDate}
+						label={I18n.t("From")}
+						style={{width: 80}}
+						onChange={d => this._onChange("fromDate", d)}
+					/>
+					:
+					<KeyboardTimePicker
+						className="time-picker-no-icon"
+						ampm={false}
+						label={I18n.t("From")}
+						mask="__:__"
+						value={this.state.fromDate}
+						style={{width: 80}}
+						onChange={d => this._onChange("fromDate", d)}
+					/>
+				}
 
-				<TimePicker
-					ampm={false}
-					initialFocusedDate={new Date("1970-01-01T00:00:00")}
-					value={this.state.toDate}
-					label={I18n.t("To")}
-					style={{marginRight: 20, marginLeft: 20, width: 80}}
-					onChange={d => this._onChange("toDate", d)}
-				/>
+				{isMobile ?
+					<TimePicker
+						ampm={false}
+						initialFocusedDate={new Date("1970-01-01T00:00:00")}
+						value={this.state.toDate}
+						label={I18n.t("To")}
+						style={{marginRight: 20, marginLeft: 20, width: 80}}
+						onChange={d => this._onChange("toDate", d)}
+					/>
+					:
+					<KeyboardTimePicker
+						className="time-picker-no-icon"
+						ampm={false}
+						label={I18n.t("To")}
+						mask="__:__"
+						value={this.state.toDate}
+						style={{marginRight: 20, marginLeft: 20, width: 80}}
+						onChange={d => this._onChange("toDate", d)}
+					/>
+				}
 
 				<TextField
 					label={I18n.t("Interval")}
@@ -139,6 +161,7 @@ class TimePeriodPicker extends Component {
 					size="small"
 					style={{marginLeft: 10}}
 					onClick={() => this.props.onDelete()}
+					tabIndex="-1"
 				>
 					<Delete />
 				</IconButton>
@@ -147,4 +170,4 @@ class TimePeriodPicker extends Component {
 	}
 }
 
-export default TimePeriodPicker;
+export default withWidth()(TimePeriodPicker);
