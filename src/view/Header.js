@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -11,7 +12,7 @@ class Header extends Component {
 	render() {
 		return <AppBar position="static" style={{backgroundColor: "#0267b1"}}>
 			<Toolbar style={{justifyContent: "space-between"}}>
-				<div>
+				<div style={{cursor: "pointer"}} onClick={() => this.props.history.push('/')}>
 					<img
 						src="header.png"
 						height={64}
@@ -30,4 +31,4 @@ class Header extends Component {
 	}
 }
 
-export default Header;
+export default withRouter(Header);
