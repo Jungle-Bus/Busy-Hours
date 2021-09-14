@@ -1,7 +1,7 @@
 {
   "fr": {
     "account_97b34646": "Compte",
-    "add_a_new_interval_b58bcf2f": "Ajouter une intervalle",
+    "add_a_new_interval_b58bcf2f": "Ajouter un intervalle",
     "add_a_new_period_d1d36596": "Ajouter une période",
     "an_error_happened_when_sending_your_changes_to_osm_332304c5": "Une erreur est survenue en envoyant les changements sur le serveur OSM",
     "busy_hours_is_a_public_transport_editor_for_openst_c14837b1": "Busy Hours est un éditeur de données de transport dans OpenStreetMap. Vous pouvez y modifier facilement les informations des lignes de transport en commun.",
@@ -10,7 +10,7 @@
     "cancel_caeb1e68": "Annuler",
     "connect_to_openstreetmap_495dcc64": "Connexion à OpenStreetMap",
     "days_concerned_5a00ba35": "Jours concernés",
-    "delete_this_interval_d9d29838": "Supprimer cette intervalle",
+    "delete_this_interval_d9d29838": "Supprimer cet intervalle",
     "delete_this_period_e9497f77": "Supprimer cette période",
     "destination_dest_5ecc389d": "Destination : %{dest}",
     "edit_hours_ee7c4bf6": "Modifier les horaires",
