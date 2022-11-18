@@ -44,7 +44,7 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "2.1.5",
+    "react-scripts": "5.0.1",
     "react-three-state-checkbox": "^1.2.2",
     "transport-hours": "git+https://github.com/Jungle-Bus/transport-hours-js.git",
     "typeface-roboto": "0.0.75",
